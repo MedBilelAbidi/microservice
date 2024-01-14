@@ -16,31 +16,6 @@ public class GatewayServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(GatewayServiceApplication.class, args);
 	}
-	/*@Bean
-	RouteLocator routeLocator (RouteLocatorBuilder builder)
-	{
-		return builder.routes()
-				.route(r -> r
-						.path("/clients/**")
-						.uri("http://localhost:8081/"))
-				.route(r -> r
-						.path("/produits/**")
-						.uri("http://localhost:8082/"))
-				.build();
-	}*/
-	/*
-	@Bean
-	RouteLocator routeLocator (RouteLocatorBuilder
-									   builder) {
-		return builder.routes()
-				.route(r -> r
-						.path("/clients/**")
-						.uri("lb://CLIENT-SERVICE"))
-				.route(r -> r
-						.path("/produits/**")
-						.uri("lb://PRODUIT-SERVICE"))
-				.build();
-	}*/
 
 	@Bean
 	DiscoveryClientRouteDefinitionLocator definitionLocator

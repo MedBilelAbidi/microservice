@@ -7,6 +7,8 @@ import org.ms.factureservice.model.Client;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+
 @Entity
 @Data @NoArgsConstructor @AllArgsConstructor @ToString
 public class Facture {
@@ -19,4 +21,6 @@ public class Facture {
     @Transient
     private Client client;
     private Long clientID;
+
+
 }
