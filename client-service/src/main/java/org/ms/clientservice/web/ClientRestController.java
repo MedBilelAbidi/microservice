@@ -15,7 +15,7 @@ public class ClientRestController{
         return clientRepository.findAll();
     }
     @GetMapping(path="/clients/{id}")
-    public Client getOne( @PathVariable Long id)
+    public Client findClientById( @PathVariable Long id)
     {
         return clientRepository.findById( id).get();
     }

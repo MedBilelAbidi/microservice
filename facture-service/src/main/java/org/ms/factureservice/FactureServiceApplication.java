@@ -37,13 +37,12 @@ public class FactureServiceApplication {
 			Client client =clientServiceClient.findClientById(1L);
 //Insérer une facture
 			Facture facture= factureRepository.save( new Facture(null,new Date(),null,
-					client,client.getId()));
+					client,client.getId(),5000));
 //Récupérer les produits à distance
 			PagedModel<Produit> listeProduits = produitServiceClient.getAllProduits();
 //Parcourir la liste des produits
 			listeProduits.forEach(p->
 			{
-//pour chaque produit, insérer une factureligne
 				FactureLigne factureLigne =new FactureLigne();
 				factureLigne.setProduitID(p.getId());
 				factureLigne.setPrice(p.getPrice());

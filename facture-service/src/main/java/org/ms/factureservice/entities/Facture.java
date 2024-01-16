@@ -21,6 +21,6 @@ public class Facture {
     @Transient
     private Client client;
     private Long clientID;
-
+    private double price;
 
 }

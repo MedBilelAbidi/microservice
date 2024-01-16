@@ -38,6 +38,7 @@ public class FactureRestController {
     {
         Facture facture= factureRepository.findById(id).get();
         Client client = clientServiceClient.findClientById(facture.getClientID());
+
         facture.setClient(client);
         facture.getFacturekignes().forEach(fl-> {
             Produit product =produitServiceClient.findProductById(fl.getProduitID());
@@ -45,26 +46,45 @@ public class FactureRestController {
         });
         return facture;
     }
+    @GetMapping(path = "/full-facture")
+    public List<Facture> getAllFactures() {
+        List<Facture> factures = factureRepository.findAll();
+
+        // Enhance the factures with additional information (e.g., clients and products)
+        factures.forEach(facture -> {
+            Client client = clientServiceClient.findClientById(facture.getClientID());
+            facture.setClient(client);
+
+            facture.getFacturekignes().forEach(fl -> {
+                Produit product = produitServiceClient.findProductById(fl.getProduitID());
+                fl.setProduit(product);
+            });
+        });
+
+        return factures;
+    }
 
     @PostMapping(path = "/full-facture")
     public Facture newFacture(@RequestBody Facture factureDetails) {
+
+        Client client = clientServiceClient.findClientById(factureDetails.getClientID());
 
         Facture facture= factureRepository.save(
                 new Facture(null,
                         new Date(),
                         null,
-                        factureDetails.getClient(),
-                        factureDetails.getClient().getId()));
+                        client,
+                        factureDetails.getClientID(),factureDetails.getPrice()));
 
         factureDetails.getFacturekignes().forEach(p->
         {
-
+            Produit product =produitServiceClient.findProductById(p.getProduitID());
             FactureLigne factureLigne =new FactureLigne(
                     null,
                     p.getProduitID(),
                     p.getQuantity(),
                     p.getPrice(),
-                    p.getProduit(),
+                    product,
                     facture);
 
             factureLigneRepository.save(factureLigne);
@@ -89,8 +109,5 @@ public class FactureRestController {
         return existingFacture;
     }
 
-    @GetMapping(path = "/full-facture")
-    public List<Facture> getAllFactures() {
-        return factureRepository.findAll();
-    }
+
 }
