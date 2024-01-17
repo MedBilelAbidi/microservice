@@ -40,4 +40,19 @@ public class ProductRestController {
     {
         produitRepository.deleteById( id);
     }
+
+    @GetMapping(path = "/sorted-by-price")
+    public List<Produit> getAllProduitsSortedByPrice(@RequestParam(required = false, defaultValue = "asc") String order) {
+        List<Produit> produits;
+
+        if ("desc".equalsIgnoreCase(order)) {
+            // Sort by price in descending order (High to Low)
+            produits = produitRepository.findAllByOrderByPriceDesc();
+        } else {
+            // Default to ascending order (Low to High)
+            produits = produitRepository.findAllByOrderByPriceAsc();
+        }
+
+        return produits;
+    }
 }

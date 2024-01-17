@@ -8,13 +8,11 @@ import org.ms.factureservice.model.Client;
 import org.ms.factureservice.model.Produit;
 import org.ms.factureservice.repository.FactureLigneRepository;
 import org.ms.factureservice.repository.FactureRepository;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @RestController
 public class FactureRestController {
@@ -94,20 +92,68 @@ public class FactureRestController {
         return facture;
 
     }
-    @PutMapping(path = "/full-facture/{id}")
-    public Facture updateFacture(@PathVariable(name = "id") Long id, @RequestBody Facture updatedFacture) {
-        Facture existingFacture = factureRepository.findById(id).orElse(null);
+    @PutMapping(path = "/full-facture/{factureId}")
+    public Facture updateFacture(@PathVariable Long factureId, @RequestBody Facture factureDetails) {
+        // Check if the facture with the given ID exists
+        Optional<Facture> existingFactureOptional = factureRepository.findById(factureId);
 
-        if (existingFacture != null) {
-            existingFacture.setDateFacture(updatedFacture.getDateFacture());
-            existingFacture.setClientID(updatedFacture.getClientID());
+        if (existingFactureOptional.isPresent()) {
+            Facture existingFacture = existingFactureOptional.get();
 
-            // Update the facture in the database
-            factureRepository.save(existingFacture);
+            // Update existing Facture details
+            existingFacture.setDateFacture(new Date());
+            existingFacture.setClient(clientServiceClient.findClientById(factureDetails.getClientID()));
+            existingFacture.setClientID(factureDetails.getClientID());
+            existingFacture.setPrice(factureDetails.getPrice());
+
+            // Clear existing FactureLignes
+
+            // Save updated Facture
+            Facture updatedFacture = factureRepository.save(existingFacture);
+            // Save FactureLignes for the updated Facture
+            factureDetails.getFacturekignes().forEach(p -> {
+                if (p.getId() != null) {
+                    factureLigneRepository.deleteById(p.getId());
+
+                }
+
+                Produit product = produitServiceClient.findProductById(p.getProduitID());
+                FactureLigne factureLigne = new FactureLigne(
+                        null,
+                        p.getProduitID(),
+                        p.getQuantity(),
+                        p.getPrice(),
+                        product,
+                        updatedFacture);
+
+                factureLigneRepository.save(factureLigne);
+            });
+
+            return updatedFacture;
+        } else {
+            // Facture with the given ID not found
+            throw new ResourceNotFoundException("Facture not found with id: " + factureId);
+        }
+    }
+    @DeleteMapping (path = "/full-facture/{factureId}")
+    public Facture deleteFacture(@PathVariable Long factureId) {
+        // Check if the facture with the given ID exists
+
+        Optional<Facture> existingFactureOptional =  factureRepository.findById(factureId);
+
+        if (existingFactureOptional.isPresent()) {
+            Facture facture = existingFactureOptional.get();
+           Collection<FactureLigne> facturesLignes =  facture.getFacturekignes();
+            facturesLignes.forEach(p -> {
+               factureLigneRepository.deleteById(p.getId());
+            });
+            factureRepository.deleteById(factureId);
+            return facture;
+
+        }else {
+            // Facture with the given ID not found
+            throw new ResourceNotFoundException("Facture not found with id: " + factureId);
         }
 
-        return existingFacture;
     }
-
-
 }
